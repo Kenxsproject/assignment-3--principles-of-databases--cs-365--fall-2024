@@ -1,0 +1,137 @@
+/* General Styles */
+:root {
+  --primary-color: #fff;
+  --background-color: #191919;
+  --border-color: #666;
+  --background-color--button: #f00;
+  --legend-content-color: #fad;
+  --notification-banner-background-color: #ffc0cb;
+  --drop-down-menu-background-color: #999;
+  --table-row-hover-background-color: #333;
+  --color-six: #4c4c4c;
+  --row-striping-background-color--odd: #262626;
+  --row-striping-background-color--even: #1e1e1e;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  margin-bottom: 100px;
+}
+
+body,
+input {
+  font-family: 'IBM Plex Mono', 'Fira Mono', Inconsolata, 'Anonymous Pro', monospace;
+}
+
+legend,
+th {
+  text-transform: uppercase;
+  color: var(--legend-content-color);
+  padding: 0 20px;
+}
+
+table,
+td,
+th {
+  border: 1px solid var(--border-color);
+}
+
+table {
+  margin: 50px auto;
+  border-collapse: collapse;
+}
+
+table td,
+table th {
+  padding: 10px;
+}
+
+table thead tr th:nth-child(5) {
+  white-space: nowrap;
+}
+
+table tbody td:nth-child(5) {
+  padding: 24px;
+  cursor: pointer;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: var(--row-striping-background-color--odd);
+}
+
+table tbody tr:nth-child(even) {
+  background-color: var(--row-striping-background-color--even);
+}
+
+table tbody tr:hover {
+  background-color: var(--table-row-hover-background-color);
+}
+
+form {
+  padding: 10px 0;
+}
+
+form fieldset {
+  padding: 10px 20px 20px;
+}
+
+form fieldset p {
+  margin-top: 15px;
+}
+
+form select {
+  border: 0;
+  padding: 5px;
+  background-color: var(--drop-down-menu-background-color);
+  font-size: .9em;
+  vertical-align: middle;
+}
+
+form input {
+  border: 1px solid var(--color-six);
+  padding: 5px;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  vertical-align: top;
+}
+
+form input:focus {
+  box-shadow: 0 0 10px var(--primary-color);
+}
+
+form input[type="submit"] {
+  border: 1px solid var(--border-color);
+  padding: 5px;
+  background-color: var(--color-six);
+  color: var(--primary-color);
+  font-size: .8em;
+}
+
+h1 {
+  text-align: center;
+}
+
+p {
+  margin: 10px 0 0;
+}
+
+#clear-results {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  margin-left: 8px;
+  text-align: left;
+}
+
+#clear-results input {
+  background-color: var(--background-color--button);
+}
+
+#error {
+  margin: 25px 0;
+  padding: 25px 0;
+  background-color: var(--notification-banner-background-color);
+  color: var(--background-color--button);
+  text-align: center;
+}
