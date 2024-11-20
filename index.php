@@ -10,8 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($operation) {
             case 'search':
                 $value = $_POST['search_value'];
-                echo "<h2>Search Results</h2>";
-                search($value); // Show search results
+                 // Show search results
                 break;
 
             case 'update':
@@ -58,9 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Display all entries after operations
-echo "<h2>All Stored Entries</h2>";
-displayAllEntries();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,6 +70,20 @@ displayAllEntries();
 
 <body>
     <h1>Password Manager</h1>
+
+
+    <!-- All Stored Entries Section -->
+    <h2>All Stored Entries</h2>
+    <?php displayAllEntries(); ?>
+
+    <!-- Search Results Section -->
+    <h2>Search Results</h2>
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['operation'] === 'search') {
+        $search = $_POST['search_value'] ?? '';
+        search($search);
+    }
+    ?>
 
     <!-- Forms Section -->
     <section>

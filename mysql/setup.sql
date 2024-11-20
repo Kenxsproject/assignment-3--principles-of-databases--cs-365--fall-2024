@@ -73,13 +73,13 @@ VALUES
 
 INSERT INTO credentials (user_id, website_id, username, password, comment)
 VALUES
-    (1, 1, 'KenD', AES_ENCRYPT('EzP@sswrd', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'Google account pass'),
-    (2, 2, 'Tomsmith', AES_ENCRYPT('MyF@cePass', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'Facebook account password'),
-    (3, 3, 'NotBatman', AES_ENCRYPT('NotB@tm@n', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'SnapChat account'),
-    (4, 4, 'NotRedHood', AES_ENCRYPT('JokersDeath', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'Discord account'),
-    (5, 5, 'NotNightWing', AES_ENCRYPT('FlyingGrayson', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'Instagram account'),
-    (6, 6, 'NotRedRobin', AES_ENCRYPT('TheDrake', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'Twitter account'),
-    (7, 7, 'NotRobin', AES_ENCRYPT('B@tSon', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'FasFa account'),
-    (8, 8, 'NotSuperman', AES_ENCRYPT('Smallville', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'WashingtonPost account'),
-    (9, 9, 'NotGreenLantern', AES_ENCRYPT('Willpower', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'youtube account'),
-    (10, 10, 'NotTheFlash', AES_ENCRYPT('SpeedForce', UNHEX(SHA2('mySuperSecretPassphrase', 256)), RANDOM_BYTES(16)), 'TikTok account');
+    (1, 1, 'KenD', AES_ENCRYPT('EzP@sswrd', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'Google account pass'),
+    (2, 2, 'Tomsmith', AES_ENCRYPT('MyF@cePass', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'Facebook account password'),
+    (3, 3, 'NotBatman', AES_ENCRYPT('NotB@tm@n', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'SnapChat account'),
+    (4, 4, 'NotRedHood', AES_ENCRYPT('JokersDeath', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'Discord account'),
+    (5, 5, 'NotNightWing', AES_ENCRYPT('FlyingGrayson', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'Instagram account'),
+    (6, 6, 'NotRedRobin', AES_ENCRYPT('TheDrake', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'Twitter account'),
+    (7, 7, 'NotRobin', AES_ENCRYPT('B@tSon', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'FasFa account'),
+    (8, 8, 'NotSuperman', AES_ENCRYPT('Smallville', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'WashingtonPost account'),
+    (9, 9, 'NotGreenLantern', AES_ENCRYPT('Willpower', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'YouTube account'),
+    (10, 10, 'NotTheFlash', AES_ENCRYPT('SpeedForce', UNHEX(SHA2('mySuperSecretPassphrase', 256)), '1234567890ABCDEF'), 'TikTok account');

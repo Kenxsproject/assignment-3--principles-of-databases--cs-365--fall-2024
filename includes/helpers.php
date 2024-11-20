@@ -2,27 +2,8 @@
 
 require_once 'includes/config.php';
 
-// Define encryption key and initialization vector
-function initialize_encryption() {
-    try {
-        $db = new PDO(
-            "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
-            DBUSER,
-            DBPASS
-        );
-        $db->exec("SET block_encryption_mode = 'aes-256-cbc';");
-        $db->exec("SET @key_str = UNHEX(SHA2('mySuperSecretPassphrase', 256));");
-        $db->exec("SET @init_vector = RANDOM_BYTES(16);");
-    } catch (PDOException $e) {
-        echo "<p>Error initializing encryption:</p>";
-        echo "<p id='error'>" . $e->getMessage() . "</p>";
-        exit;
-    }
-}
-
-initialize_encryption();
-
-function search($search) {
+function search($search)
+{
     try {
         $db = new PDO(
             "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
@@ -32,8 +13,8 @@ function search($search) {
 
         // Initialize encryption settings
         $db->exec("SET block_encryption_mode = 'aes-256-cbc';");
-        $db->exec("SET @key_str = SHA2('mySuperSecretPassphrase', 256);");
-        $db->exec("SET @init_vector = '1234567890ABCDEF';"); // Initialization vector as plain string
+        $db->exec("SET @key_str = UNHEX(SHA2('mySuperSecretPassphrase', 256));");
+        $db->exec("SET @init_vector = '1234567890ABCDEF';"); // Fixed initialization vector
 
         // Query to search and decrypt passwords
         $query = "
@@ -78,12 +59,15 @@ function search($search) {
                     </thead>
                     <tbody>";
             foreach ($results as $row) {
+                // Check if `decrypted_password` is null, which means decryption failed
+                $decrypted_password = $row['decrypted_password'] ?? 'Decryption failed';
+
                 echo "<tr>
                         <td>" . htmlspecialchars($row['site_name'] ?? '') . "</td>
                         <td>" . htmlspecialchars($row['url'] ?? '') . "</td>
                         <td>" . htmlspecialchars($row['email'] ?? '') . "</td>
                         <td>" . htmlspecialchars($row['username'] ?? '') . "</td>
-                        <td>" . htmlspecialchars($row['decrypted_password'] ?? '') . "</td>
+                        <td>" . htmlspecialchars($decrypted_password) . "</td>
                         <td>" . htmlspecialchars($row['comment'] ?? '') . "</td>
                         <td>" . htmlspecialchars($row['created_at'] ?? '') . "</td>
                     </tr>";
@@ -99,7 +83,8 @@ function search($search) {
 }
 
 
-function insert($website_name, $url, $email, $username, $password, $comment) {
+function insert($website_name, $url, $email, $username, $password, $comment)
+{
     try {
         $db = new PDO(
             "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
@@ -109,8 +94,8 @@ function insert($website_name, $url, $email, $username, $password, $comment) {
 
         // Initialize encryption settings
         $db->exec("SET block_encryption_mode = 'aes-256-cbc';");
-        $db->exec("SET @key_str = SHA2('mySuperSecretPassphrase', 256);");
-        $db->exec("SET @init_vector = '1234567890ABCDEF';"); // Initialization vector as plain string
+        $db->exec("SET @key_str = UNHEX(SHA2('mySuperSecretPassphrase', 256));");
+        $db->exec("SET @init_vector = '1234567890ABCDEF';"); // Static IV for consistency
 
         // Retrieve or insert user_id
         $user_query = $db->prepare("SELECT id FROM users WHERE email = :email");
@@ -134,22 +119,10 @@ function insert($website_name, $url, $email, $username, $password, $comment) {
             $website_id = $db->lastInsertId();
         }
 
-        // Encrypt the password
-        $encryption_query = $db->prepare("
-            SELECT AES_ENCRYPT(:password, @key_str, @init_vector) AS encrypted_password
-        ");
-        $encryption_query->execute([':password' => $password]);
-        $encrypted_password_result = $encryption_query->fetch(PDO::FETCH_ASSOC);
-        $encrypted_password = $encrypted_password_result['encrypted_password'];
-
-        if (!$encrypted_password) {
-            throw new Exception("Password encryption failed.");
-        }
-
         // Insert into credentials
         $query = "
             INSERT INTO credentials (user_id, website_id, username, password, comment)
-            VALUES (:user_id, :website_id, :username, :password, :comment)
+            VALUES (:user_id, :website_id, :username, AES_ENCRYPT(:password, @key_str, @init_vector), :comment)
         ";
 
         $statement = $db->prepare($query);
@@ -157,26 +130,25 @@ function insert($website_name, $url, $email, $username, $password, $comment) {
             'user_id' => $user_id,
             'website_id' => $website_id,
             'username' => $username,
-            'password' => $encrypted_password,
+            'password' => $password,
             'comment' => $comment
         ]);
 
         echo "<p>Insert successful.</p>";
+        displayAllEntries();
 
     } catch (PDOException $e) {
         echo "<p>Error in <code>insert</code>:</p>";
-        echo "<p id='error'>" . htmlspecialchars($e->getMessage()) . "</p>";
-        exit;
-    } catch (Exception $e) {
-        echo "<p>Error in <code>insert</code>:</p>";
-        echo "<p id='error'>" . htmlspecialchars($e->getMessage()) . "</p>";
+        echo "<p id='error'>" . $e->getMessage() . "</p>";
         exit;
     }
 }
 
 
 
-function update($update_column, $new_value, $search_column, $search_value) {
+
+function update($update_column, $new_value, $search_column, $search_value)
+{
     try {
         $db = new PDO(
             "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
@@ -184,29 +156,40 @@ function update($update_column, $new_value, $search_column, $search_value) {
             DBPASS
         );
 
-        // Allowed columns for safety
+        $db->exec("SET block_encryption_mode = 'aes-256-cbc';");
+        $db->exec("SET @key_str = UNHEX(SHA2('mySuperSecretPassphrase', 256));");
+        $db->exec("SET @init_vector = '1234567890ABCDEF';"); // Initialization vector as plain string
+
         $allowed_columns = ['id', 'website_name', 'url', 'email', 'username', 'password', 'comment'];
         if (!in_array($update_column, $allowed_columns, true) || !in_array($search_column, $allowed_columns, true)) {
             throw new Exception("Invalid column specified for update.");
         }
 
-        // Build the query based on the search column
-        if ($search_column === 'id') {
-            // Update directly by ID
+        // If updating the password, encrypt it
+        if ($update_column === 'password') {
             $query = "
                 UPDATE credentials
-                SET {$update_column} = :new_value
-                WHERE id = :search_value
-            ";
-        } else {
-            // Update by other fields
-            $query = "
-                UPDATE credentials
-                SET {$update_column} = :new_value
+                SET password = AES_ENCRYPT(:new_value, @key_str, @init_vector)
                 WHERE {$search_column} = :search_value
             ";
+        } else {
+            // For other fields, perform a standard update
+            if ($search_column === 'id') {
+                $query = "
+                    UPDATE credentials
+                    SET {$update_column} = :new_value
+                    WHERE id = :search_value
+                ";
+            } else {
+                $query = "
+                    UPDATE credentials
+                    SET {$update_column} = :new_value
+                    WHERE {$search_column} = :search_value
+                ";
+            }
         }
 
+        // Prepare and execute the statement
         $statement = $db->prepare($query);
         $statement->execute([
             'new_value' => $new_value,
@@ -214,7 +197,8 @@ function update($update_column, $new_value, $search_column, $search_value) {
         ]);
 
         echo "<p>Update successful. Displaying all entries:</p>";
-        displayAllEntries();
+
+
 
     } catch (PDOException $e) {
         echo "<p>Error in <code>update</code>:</p>";
@@ -227,7 +211,9 @@ function update($update_column, $new_value, $search_column, $search_value) {
 
 
 
-function delete($delete_column, $delete_value) {
+
+function delete($delete_column, $delete_value)
+{
     try {
         $db = new PDO(
             "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
@@ -273,17 +259,14 @@ function delete($delete_column, $delete_value) {
 
 
 //shortcut to display all info in the table without having to keep rewriting it.
-function displayAllEntries() {
+function displayAllEntries()
+{
     try {
         $db = new PDO(
             "mysql:host=" . DBHOST . ";dbname=" . DBNAME . ";charset=utf8",
             DBUSER,
             DBPASS
         );
-
-        $db->exec("SET block_encryption_mode = 'aes-256-cbc';");
-        $db->exec("SET @key_str = UNHEX(SHA2('mySuperSecretPassphrase', 256));");
-        $db->exec("SET @init_vector = RANDOM_BYTES(16);");
 
         $query = "
             SELECT
@@ -295,7 +278,6 @@ function displayAllEntries() {
                 w.url,
                 c.username,
                 c.password AS encrypted_password,
-                CAST(AES_DECRYPT(c.password, @key_str, @init_vector) AS CHAR) AS decrypted_password,
                 c.comment,
                 c.created_at
             FROM credentials c
@@ -319,8 +301,7 @@ function displayAllEntries() {
             echo "      <th>Website Name</th>\n";
             echo "      <th>URL</th>\n";
             echo "      <th>Username</th>\n";
-            echo "      <th>Encrypted Password</th>\n"; // Added encrypted password
-            echo "      <th>Decrypted Password</th>\n";
+            echo "      <th>Encrypted Password</th>\n"; // Keep encrypted passwords
             echo "      <th>Comment</th>\n";
             echo "      <th>Created At</th>\n";
             echo "    </tr>\n";
@@ -328,7 +309,6 @@ function displayAllEntries() {
             echo "  <tbody>\n";
 
             foreach ($entries as $entry) {
-
                 echo "    <tr>\n";
                 echo "      <td>" . htmlspecialchars($entry['id'] ?? '') . "</td>\n";
                 echo "      <td>" . htmlspecialchars(($entry['user_first_name'] ?? '') . ' ' . ($entry['user_last_name'] ?? '')) . "</td>\n";
@@ -337,7 +317,6 @@ function displayAllEntries() {
                 echo "      <td>" . htmlspecialchars($entry['url'] ?? '') . "</td>\n";
                 echo "      <td>" . htmlspecialchars($entry['username'] ?? '') . "</td>\n";
                 echo "      <td>" . htmlspecialchars($entry['encrypted_password'] ?? '') . "</td>\n";
-                echo "      <td>" . htmlspecialchars($entry['decrypted_password'] ?? '') . "</td>\n";
                 echo "      <td>" . htmlspecialchars($entry['comment'] ?? '') . "</td>\n";
                 echo "      <td>" . htmlspecialchars($entry['created_at'] ?? '') . "</td>\n";
                 echo "    </tr>\n";
