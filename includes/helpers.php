@@ -296,7 +296,7 @@ function displayAllEntries()
             echo "  <thead>\n";
             echo "    <tr>\n";
             echo "      <th>ID</th>\n";
-            echo "      <th>User Name</th>\n";
+            echo "      <th>Name</th>\n";
             echo "      <th>User Email</th>\n";
             echo "      <th>Website Name</th>\n";
             echo "      <th>URL</th>\n";
