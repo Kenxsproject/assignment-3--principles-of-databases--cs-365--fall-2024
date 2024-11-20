@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($operation) {
             case 'search':
                 $value = $_POST['search_value'];
-                 // Show search results
+                // Show search results
                 break;
 
             case 'update':
